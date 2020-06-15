@@ -9,8 +9,8 @@ namespace Deterministic
     // However, they do have sizes in Unity rendering so it will look a bit weird (there will be some overlap)
     public class Simulation
     {
-
         // This should be moved to a separate data class for bigger projects
+
         #region Game Entity State
 
         public Vector2 BallPosition { get; private set; }
@@ -36,6 +36,9 @@ namespace Deterministic
         private Vector2 _aiPaddlePosition;
         private float _paddleDistance;
         private float _startCountdown;
+        
+        // Threshold allowed for collision detection
+        private const float Threshold = 0.01f;
 
         public Simulation(GameConfig config, Vector2 size, float paddleLength)
         {
@@ -72,14 +75,15 @@ namespace Deterministic
             CheckPaddleCollision(_playerPaddlePosition);
             CheckPaddleCollision(_aiPaddlePosition);
             CheckTopBottomWallCollision();
-            if (Math.Abs(BallPosition.x - _size.x) < 0.01)
+
+            if (Mathf.Abs(BallPosition.x - _size.x) < Threshold)
             {
                 // For this version, UI and score logic is not implemented
                 Debug.Log("AI Won");
                 ResetBallAndPaddles();
             }
 
-            if (Math.Abs(BallPosition.x + _size.x) < 0.01)
+            if (Mathf.Abs(BallPosition.x + _size.x) < Threshold)
             {
                 Debug.Log("Player Won");
                 ResetBallAndPaddles();
@@ -97,7 +101,7 @@ namespace Deterministic
 
         private void CheckTopBottomWallCollision()
         {
-            if (Math.Abs(BallPosition.y + _size.y) < 0.01 || Math.Abs(BallPosition.y - _size.y) < 0.01)
+            if (Mathf.Abs(BallPosition.y + _size.y) < Threshold || Mathf.Abs(BallPosition.y - _size.y) < Threshold)
             {
                 _ballVelocity.y = -_ballVelocity.y;
             }
@@ -105,13 +109,13 @@ namespace Deterministic
 
         private void CheckPaddleCollision(Vector2 paddlePosition)
         {
-            if (Math.Abs(BallPosition.x - paddlePosition.x) < 0.01)
+            if (Mathf.Abs(BallPosition.x - paddlePosition.x) < Threshold)
             {
                 var percent = (BallPosition.y - paddlePosition.y) / _paddleLength;
                 // There's collision!
-                if (Math.Abs(percent) <= 0.5)
+                if (Mathf.Abs(percent) <= 0.5)
                 {
-                    var vy = Math.Abs(_ballVelocity.x) * percent * Config.CollisionMultiplier;
+                    var vy = Mathf.Abs(_ballVelocity.x) * percent * Config.CollisionMultiplier;
                     _ballVelocity = new Vector2(-_ballVelocity.x, vy);
                 }
             }
